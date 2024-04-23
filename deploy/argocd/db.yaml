@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: db
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    namespace: default
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://lexfrei.github.io/charts"
+    targetRevision: "0.2.1"
+    chart: frame
+    helm:
+      values: |
+        image:
+          repository: "postgres"
+          tag: "15-alpine"
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        pvcs:
+          enabled: true
+          list:
+            - name: db-data
+              storageClassName: "longhorn"
+              accessMode: ReadWriteOnce
+              size: 1Gi
+              path: /data
+        service:
+          port: 5432
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
