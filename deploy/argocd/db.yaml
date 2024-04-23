@@ -31,6 +31,7 @@ spec:
               size: 1Gi
               path: /data
         service:
+          enabled: true
           port: 5432
   syncPolicy:
     automated:
